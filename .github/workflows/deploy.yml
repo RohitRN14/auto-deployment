@@ -183,7 +183,7 @@ jobs:
           labels: ${{ steps.meta-backend.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
 
       # Build frontend image and push to Docker Hub
       - name: 🔨 Build & push frontend image
@@ -196,7 +196,7 @@ jobs:
           labels: ${{ steps.meta-frontend.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           build-args: |
             VITE_API_URL=
 
@@ -207,28 +207,18 @@ jobs:
           echo "SHA tag : ${{ github.sha }}"
 
   # ────────────────────────────────────────────────────────────────────────────
-  # JOB 4 – Deploy
-  #
-  # Approach A (default): self-hosted runner on your local machine.
-  #   Install the runner on your machine (see README.md – "Self-Hosted Runner Setup").
-  #   The runner already has Docker installed and can pull & restart containers.
-  #
-  # Approach B: SSH deploy to a remote Linux VM.
-  #   Set DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY secrets in GitHub.
-  #   Uncomment the SSH block below and comment out the direct docker commands.
-  #
-  # ⚠️  GitHub-hosted runners (ubuntu-latest) are ephemeral cloud VMs.
-  #      They CANNOT reach your local machine directly.
-  #      To deploy locally you MUST use a self-hosted runner (Approach A).
+  # JOB 4 – Deploy & Container Verification
+  #          Pulls the freshly published images and runs an automated live deployment
+  #          check directly on the runner.
   # ────────────────────────────────────────────────────────────────────────────
   deploy:
-    name: 🚀 Deploy to Docker Host
-    runs-on: self-hosted          # ← Change to ubuntu-latest if using SSH approach
+    name: 🚀 Deploy & Verify Containers
+    runs-on: ubuntu-latest
     needs: [docker-push]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-    # Safety timeout – fail fast if deployment hangs
-    timeout-minutes: 15
+    # Safety timeout
+    timeout-minutes: 10
 
     steps:
       - name: ⬇️ Checkout code (for docker-compose.yml)
