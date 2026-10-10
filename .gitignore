@@ -1,0 +1,42 @@
+# ── Node & npm ────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json.bak
+
+# ── Environment files ─────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+# ── Build outputs ─────────────────────────────────────────────────────────────
+dist/
+build/
+frontend/dist/
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ── OS artefacts ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ── Editor ────────────────────────────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# ── Coverage ──────────────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+# (docker-compose.override.yml can hold local overrides)
+docker-compose.override.yml
