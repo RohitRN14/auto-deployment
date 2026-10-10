@@ -76,6 +76,8 @@ async function startServer() {
   }
 }
 
-startServer();
+if (process.env.NODE_ENV !== 'test' && require.main === module) {
+  startServer();
+}
 
 module.exports = app; // for testing
