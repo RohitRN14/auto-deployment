@@ -28,6 +28,19 @@ const todoSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    userName: {
+      type: String,
+      default: 'Guest',
+    },
+    userEmail: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: true, // adds createdAt and updatedAt automatically
@@ -37,6 +50,7 @@ const todoSchema = new mongoose.Schema(
 );
 
 // Index for faster queries
+todoSchema.index({ user: 1, completed: 1, createdAt: -1 });
 todoSchema.index({ completed: 1, createdAt: -1 });
 
 const Todo = mongoose.model('Todo', todoSchema);

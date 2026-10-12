@@ -1,10 +1,22 @@
 import { useState } from 'react';
 import AddTodoForm from './components/AddTodoForm';
 import TodoList from './components/TodoList';
+import AuthModal from './components/AuthModal';
+import AdminUsersModal from './components/AdminUsersModal';
 import { useTodos } from './hooks/useTodos';
+import { useAuth } from './context/AuthContext';
 
 export default function App() {
   const [filter, setFilter] = useState('all');
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [adminUsersModalOpen, setAdminUsersModalOpen] = useState(false);
+
+  // Admin view states: 'all' or 'mine'
+  const [adminScope, setAdminScope] = useState('all');
+  const [userFilter, setUserFilter] = useState(null);
+  const [userFilterName, setUserFilterName] = useState(null);
+
+  const { user, isAdmin, logout, demoLogin } = useAuth();
 
   const {
     todos,
@@ -16,18 +28,126 @@ export default function App() {
     updateTodo,
     deleteTodo,
     deleteCompleted,
-  } = useTodos(filter);
+  } = useTodos(filter, adminScope, userFilter);
+
+  const handleSelectUserFilter = (userId, userName) => {
+    setUserFilter(userId);
+    setUserFilterName(userName);
+  };
+
+  const handleClearUserFilter = () => {
+    setUserFilter(null);
+    setUserFilterName(null);
+  };
 
   return (
     <div className="app">
-      {/* ── Header ────────────────────────────────────────────────────────── */}
+      {/* ── Header & Top Navigation ────────────────────────────────────────── */}
       <header className="header">
-        <div className="header-logo">
-          <div className="logo-icon" aria-hidden="true">⚡</div>
-          <h1>TaskFlow</h1>
+        <div className="header-nav-bar">
+          <div className="header-brand">
+            <div className="logo-icon" aria-hidden="true">⚡</div>
+            <div className="brand-text">
+              <h1>TaskFlow</h1>
+              <span className="brand-tag">MERN · DevOps</span>
+            </div>
+          </div>
+
+          <div className="header-auth-actions">
+            {user ? (
+              <div className="user-profile-menu">
+                <div className="user-info-chip">
+                  <span className={`role-pill role-pill-${user.role}`}>
+                    {user.role === 'admin' ? '🛡️ Admin' : '👤 User'}
+                  </span>
+                  <span className="user-name-display" title={user.email}>
+                    {user.name}
+                  </span>
+                </div>
+
+                {isAdmin && (
+                  <div className="admin-quick-controls">
+                    <button
+                      type="button"
+                      className={`btn-scope-toggle ${adminScope === 'all' && !userFilter ? 'active' : ''}`}
+                      onClick={() => {
+                        setAdminScope((prev) => (prev === 'all' ? 'mine' : 'all'));
+                        handleClearUserFilter();
+                      }}
+                      title="Toggle between All Tasks and My Tasks"
+                    >
+                      {adminScope === 'all' && !userFilter ? '🌐 All Tasks' : '📁 My Tasks'}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-admin-manage"
+                      onClick={() => setAdminUsersModalOpen(true)}
+                      title="Open user directory and analytics"
+                    >
+                      👥 Users
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  className="btn-auth-logout"
+                  onClick={logout}
+                  title="Sign out of account"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <div className="guest-auth-actions">
+                <div className="guest-demo-chips">
+                  <button
+                    type="button"
+                    className="chip-demo chip-admin"
+                    onClick={() => demoLogin('admin')}
+                    title="1-Click Demo Login as Administrator"
+                  >
+                    🛡️ Demo Admin
+                  </button>
+                  <button
+                    type="button"
+                    className="chip-demo chip-user"
+                    onClick={() => demoLogin('user')}
+                    title="1-Click Demo Login as Standard User"
+                  >
+                    👤 Demo User
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className="btn-auth-signin"
+                  onClick={() => setAuthModalOpen(true)}
+                >
+                  Sign In / Register
+                </button>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Admin Filter Indicator */}
+        {userFilter && (
+          <div className="admin-filter-banner" role="status">
+            <span>
+              🛡️ Filtering tasks by user: <strong>{userFilterName}</strong>
+            </span>
+            <button
+              type="button"
+              className="btn-clear-user-filter"
+              onClick={handleClearUserFilter}
+            >
+              Clear Filter ✕
+            </button>
+          </div>
+        )}
+
         <p className="header-subtitle">
-          MERN Stack · Powered by React, Express &amp; MongoDB
+          Enterprise MERN Stack with Role-Based Access Control &amp; Automated DevOps CI/CD
         </p>
       </header>
 
@@ -52,12 +172,24 @@ export default function App() {
       {/* ── Footer ────────────────────────────────────────────────────────── */}
       <footer className="footer">
         <p>
-          Built with ❤️ · MERN Stack ·{' '}
+          Built with ❤️ · MERN Stack · Role-Based Auth ·{' '}
           <a href="https://github.com" target="_blank" rel="noopener noreferrer">
             View on GitHub
           </a>
         </p>
       </footer>
+
+      {/* ── Modals ─────────────────────────────────────────────────────────── */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+      />
+
+      <AdminUsersModal
+        isOpen={adminUsersModalOpen}
+        onClose={() => setAdminUsersModalOpen(false)}
+        onSelectUserFilter={handleSelectUserFilter}
+      />
     </div>
   );
 }

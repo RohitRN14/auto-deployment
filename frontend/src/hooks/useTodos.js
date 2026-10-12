@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { todoApi } from '../api/todoApi';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 /**
  * Custom hook for all Todo operations.
  * Returns todo list state, loading/error flags, and CRUD action handlers.
  */
-export function useTodos(filter = 'all') {
+export function useTodos(filter = 'all', adminScope = 'all', userFilter = null) {
+  const { user } = useAuth();
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,6 +22,14 @@ export function useTodos(filter = 'all') {
       if (filter === 'active') params.completed = false;
       if (filter === 'completed') params.completed = true;
 
+      if (user?.role === 'admin') {
+        if (userFilter) {
+          params.userId = userFilter;
+        } else {
+          params.scope = adminScope;
+        }
+      }
+
       const res = await todoApi.getAll(params);
       setTodos(res.data.data);
     } catch (err) {
@@ -28,7 +38,7 @@ export function useTodos(filter = 'all') {
     } finally {
       setLoading(false);
     }
-  }, [filter]);
+  }, [filter, adminScope, userFilter, user]);
 
   useEffect(() => {
     fetchTodos();
@@ -103,7 +113,7 @@ export function useTodos(filter = 'all') {
     }
     setTodos((prev) => prev.filter((t) => !t.completed));
     try {
-      await todoApi.deleteCompleted();
+      await todoApi.deleteCompleted({ scope: adminScope });
       toast.success(`Cleared ${count} completed task${count !== 1 ? 's' : ''}`);
     } catch (err) {
       await fetchTodos();

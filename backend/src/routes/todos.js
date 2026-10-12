@@ -12,6 +12,10 @@ const {
   deleteCompleted,
 } = require('../controllers/todoController');
 const validate = require('../middleware/validate');
+const { optionalAuth } = require('../middleware/auth');
+
+// Apply optionalAuth to all todo routes
+router.use(optionalAuth);
 
 // ── Validation rules ───────────────────────────────────────────────────────────
 const createRules = [

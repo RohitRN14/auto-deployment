@@ -156,18 +156,45 @@ docker compose restart backend         # Restart one service
 
 ---
 
+## 👥 User & Admin Authentication (RBAC)
+
+TaskFlow features Role-Based Access Control (RBAC):
+- **Standard Users**: Manage their own personal tasks and deadlines.
+- **Administrators**: Have full supervisory oversight to view all users' tasks, filter tasks by specific user, and access the User Directory with task completion analytics.
+
+### Demo Credentials (1-Click in UI or manual)
+
+| Role | Email | Password | Privileges |
+|------|-------|----------|------------|
+| **🛡️ Admin** | `admin@taskflow.dev` | `Admin@123` | Full oversight, view/filter all tasks, user directory |
+| **👤 User** | `user@taskflow.dev` | `User@123` | Personal task management |
+
+---
+
 ## 🔌 API Endpoints
+
+### Authentication Routes
+
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| POST | `/api/auth/register` | Public | Register account (`role: 'user'` or `'admin'`) |
+| POST | `/api/auth/login` | Public | Authenticate user & receive JWT token |
+| GET | `/api/auth/me` | Protected | Return currently authenticated user profile |
+| GET | `/api/auth/users` | **Admin Only** | List all users with task counts & statistics |
+| POST | `/api/auth/seed` | Public / Dev | Seed default demo Admin and User accounts |
+
+### Todo Routes
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/health` | Health check (MongoDB status) |
-| GET | `/api/todos` | List all todos (supports `?completed=true/false&priority=high`) |
-| GET | `/api/todos/:id` | Get single todo |
-| POST | `/api/todos` | Create todo |
-| PUT | `/api/todos/:id` | Update todo |
-| PATCH | `/api/todos/:id/toggle` | Toggle completed status |
-| DELETE | `/api/todos/:id` | Delete todo |
-| DELETE | `/api/todos/completed/all` | Delete all completed todos |
+| GET | `/api/todos` | List todos (User: own tasks; Admin: supports `?scope=all&userId=...`) |
+| GET | `/api/todos/:id` | Get single todo (Owner or Admin) |
+| POST | `/api/todos` | Create todo (automatically linked to authenticated user) |
+| PUT | `/api/todos/:id` | Update todo (Owner or Admin) |
+| PATCH | `/api/todos/:id/toggle` | Toggle completed status (Owner or Admin) |
+| DELETE | `/api/todos/:id` | Delete todo (Owner or Admin) |
+| DELETE | `/api/todos/completed/all` | Delete completed todos (User: own; Admin: system-wide) |
 
 **Example request:**
 ```bash

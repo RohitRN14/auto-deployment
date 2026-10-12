@@ -122,6 +122,11 @@ export default function TodoCard({ todo, onToggle, onUpdate, onDelete }) {
                 {todo.dueDate && (
                   <span className="todo-date">📅 {formatDate(todo.dueDate)}</span>
                 )}
+                {todo.userName && (
+                  <span className="todo-author-badge" title={`Owner: ${todo.userEmail || todo.userName}`}>
+                    👤 {todo.userName}
+                  </span>
+                )}
                 <span className="todo-date" style={{ marginLeft: 'auto' }}>
                   {new Date(todo.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </span>

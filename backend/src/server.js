@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const todoRoutes = require('./routes/todos');
+const authRoutes = require('./routes/auth');
+const { seedDefaultUsers } = require('./controllers/authController');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -26,6 +28,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api/todos', todoRoutes);
 
 // ── 404 Handler ───────────────────────────────────────────────────────────────
@@ -46,6 +49,9 @@ async function startServer() {
       serverSelectionTimeoutMS: 10000,
     });
     console.log('✅  MongoDB connected:', MONGO_URI.replace(/\/\/.*@/, '//***@'));
+
+    // Automatically seed default Admin and User if not already present
+    await seedDefaultUsers();
 
     const server = app.listen(PORT, () => {
       console.log(`🚀  Backend running on http://localhost:${PORT}`);

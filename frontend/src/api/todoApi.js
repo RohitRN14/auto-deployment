@@ -12,6 +12,18 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+// ── Request interceptor to attach JWT token ───────────────────────────────────
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('taskflow_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // ── Response interceptor for uniform error messages ───────────────────────────
 api.interceptors.response.use(
   (response) => response,
@@ -24,6 +36,15 @@ api.interceptors.response.use(
   }
 );
 
+// ── Authentication API methods ────────────────────────────────────────────────
+export const authApi = {
+  login: (credentials) => api.post('/auth/login', credentials),
+  register: (userData) => api.post('/auth/register', userData),
+  getMe: () => api.get('/auth/me'),
+  getUsers: () => api.get('/auth/users'),
+  seedDefaults: () => api.post('/auth/seed'),
+};
+
 // ── Todo API methods ──────────────────────────────────────────────────────────
 export const todoApi = {
   getAll: (params = {}) => api.get('/todos', { params }),
@@ -32,7 +53,7 @@ export const todoApi = {
   update: (id, data) => api.put(`/todos/${id}`, data),
   toggle: (id) => api.patch(`/todos/${id}/toggle`),
   delete: (id) => api.delete(`/todos/${id}`),
-  deleteCompleted: () => api.delete('/todos/completed/all'),
+  deleteCompleted: (params = {}) => api.delete('/todos/completed/all', { params }),
   health: () => api.get('/health'),
 };
 
