@@ -1,7 +1,7 @@
 # ⚡ TaskFlow – MERN Stack To-Do App with DevOps Pipeline
 
-[![CI/CD](https://img.shields.io/github/actions/workflow/status/YOUR_USERNAME/taskflow/deploy.yml?branch=main&label=CI%2FCD&logo=github-actions)](https://github.com/YOUR_USERNAME/taskflow/actions)
-[![Docker](https://img.shields.io/docker/pulls/YOUR_USERNAME/taskflow-backend?logo=docker)](https://hub.docker.com/r/YOUR_USERNAME/taskflow-backend)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/RohitRN14/auto-deployment/deploy.yml?branch=main&label=CI%2FCD&logo=github-actions)](https://github.com/RohitRN14/auto-deployment/actions)
+[![Docker](https://img.shields.io/docker/pulls/rrn1410/taskflow-backend?logo=docker)](https://hub.docker.com/r/rrn1410/taskflow-backend)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 A production-ready, full-stack **MERN** To-Do application with an automated **GitHub Actions CI/CD pipeline** that builds Docker images, pushes them to Docker Hub, and deploys them to a Docker host.
@@ -11,23 +11,28 @@ A production-ready, full-stack **MERN** To-Do application with an automated **Gi
 ## 📁 Project Structure
 
 ```
-taskflow/
+auto-deployment/
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml          ← GitHub Actions CI/CD pipeline
+│       └── deploy.yml              ← GitHub Actions CI/CD pipeline
 ├── backend/
 │   ├── src/
 │   │   ├── controllers/
-│   │   │   └── todoController.js
+│   │   │   ├── authController.js    ← Auth + JWT + user seeding
+│   │   │   └── todoController.js    ← CRUD + role-based filtering
 │   │   ├── middleware/
+│   │   │   ├── auth.js              ← protect, optionalAuth, authorize
 │   │   │   ├── errorHandler.js
 │   │   │   └── validate.js
 │   │   ├── models/
-│   │   │   └── Todo.js
+│   │   │   ├── Todo.js
+│   │   │   └── User.js              ← User schema + bcrypt hashing
 │   │   ├── routes/
+│   │   │   ├── auth.js              ← Register, login, /me, /users
 │   │   │   └── todos.js
 │   │   └── server.js
 │   ├── tests/
+│   │   ├── auth.test.js
 │   │   └── todo.test.js
 │   ├── .env.example
 │   ├── .gitignore
@@ -38,11 +43,15 @@ taskflow/
 │   │   └── favicon.svg
 │   ├── src/
 │   │   ├── api/
-│   │   │   └── todoApi.js
+│   │   │   └── todoApi.js           ← Axios instance + auth/todo APIs
 │   │   ├── components/
 │   │   │   ├── AddTodoForm.jsx
+│   │   │   ├── AdminUsersModal.jsx   ← Admin user directory panel
+│   │   │   ├── AuthModal.jsx         ← Login / Register modal
 │   │   │   ├── TodoCard.jsx
 │   │   │   └── TodoList.jsx
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx       ← React auth context + demo login
 │   │   ├── hooks/
 │   │   │   └── useTodos.js
 │   │   ├── App.jsx
@@ -58,6 +67,7 @@ taskflow/
 ├── .env.example
 ├── .gitignore
 ├── docker-compose.yml
+├── LICENSE
 └── README.md
 ```
 
@@ -84,8 +94,8 @@ Optional (for CI/CD):
 ### 1. Clone & setup environment
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/taskflow.git
-cd taskflow
+git clone https://github.com/RohitRN14/auto-deployment.git
+cd auto-deployment
 
 # Backend env
 cp backend/.env.example backend/.env
@@ -371,7 +381,7 @@ docker ps   # verify runner can use Docker
 git init
 git add .
 git commit -m "feat: initial MERN todo app with DevOps pipeline"
-git remote add origin https://github.com/YOUR_USERNAME/taskflow.git
+git remote add origin https://github.com/RohitRN14/auto-deployment.git
 git push -u origin main
 ```
 
@@ -405,8 +415,8 @@ Go to **Settings** → **Secrets and variables** → **Actions** → **New repos
 
 1. Go to [hub.docker.com](https://hub.docker.com) → **Create Repository**
 2. Create:
-   - `YOUR_USERNAME/taskflow-backend`
-   - `YOUR_USERNAME/taskflow-frontend`
+   - `rrn1410/taskflow-backend`
+   - `rrn1410/taskflow-frontend`
 3. Set visibility to **Public** (free) or Private
 
 ### Step 2: Create an access token (minimum permissions)
@@ -544,4 +554,4 @@ docker inspect --format='{{json .State.Health}}' taskflow-backend | python3 -m j
 
 ## 📄 License
 
-MIT © 2024 – Free to use and modify.
+MIT © 2026 Rohit Nagalwade – Free to use and modify.
