@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AddTodoForm from './components/AddTodoForm';
 import TodoList from './components/TodoList';
 import AuthModal from './components/AuthModal';
 import AdminUsersModal from './components/AdminUsersModal';
 import { useTodos } from './hooks/useTodos';
 import { useAuth } from './context/AuthContext';
+import { authApi } from './api/todoApi';
 
 export default function App() {
   const [filter, setFilter] = useState('all');
@@ -15,6 +16,10 @@ export default function App() {
   const [adminScope, setAdminScope] = useState('all');
   const [userFilter, setUserFilter] = useState(null);
   const [userFilterName, setUserFilterName] = useState(null);
+
+  // Users directory for Admin allotment
+  const [users, setUsers] = useState([]);
+  const [assignedUser, setAssignedUser] = useState('');
 
   const { user, isAdmin, logout, demoLogin } = useAuth();
 
@@ -30,6 +35,26 @@ export default function App() {
     deleteCompleted,
   } = useTodos(filter, adminScope, userFilter);
 
+  // Fetch registered users when admin logs in
+  useEffect(() => {
+    if (!isAdmin) {
+      setUsers([]);
+      setAssignedUser('');
+      return;
+    }
+
+    async function loadUsers() {
+      try {
+        const res = await authApi.getUsers();
+        setUsers(res.data?.data || []);
+      } catch (err) {
+        console.warn('Could not load users directory for admin allotment:', err.message);
+      }
+    }
+
+    loadUsers();
+  }, [isAdmin]);
+
   const handleSelectUserFilter = (userId, userName) => {
     setUserFilter(userId);
     setUserFilterName(userName);
@@ -38,6 +63,15 @@ export default function App() {
   const handleClearUserFilter = () => {
     setUserFilter(null);
     setUserFilterName(null);
+  };
+
+  const handleAssignToUser = (userId, userName) => {
+    setAssignedUser(userId);
+    const input = document.getElementById('todo-title-input');
+    if (input) {
+      input.focus();
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   };
 
   return (
@@ -84,7 +118,7 @@ export default function App() {
                       onClick={() => setAdminUsersModalOpen(true)}
                       title="Open user directory and analytics"
                     >
-                      👥 Users
+                      👥 Users ({users.length})
                     </button>
                   </div>
                 )}
@@ -153,7 +187,13 @@ export default function App() {
 
       {/* ── Main Content ──────────────────────────────────────────────────── */}
       <main className="main">
-        <AddTodoForm onAdd={createTodo} />
+        <AddTodoForm
+          onAdd={createTodo}
+          isAdmin={isAdmin}
+          users={users}
+          assignedUser={assignedUser}
+          setAssignedUser={setAssignedUser}
+        />
 
         <TodoList
           todos={todos}
@@ -166,6 +206,8 @@ export default function App() {
           onDelete={deleteTodo}
           onClearCompleted={deleteCompleted}
           stats={stats}
+          isAdmin={isAdmin}
+          users={users}
         />
       </main>
 
@@ -173,7 +215,7 @@ export default function App() {
       <footer className="footer">
         <p>
           Built with ❤️ · MERN Stack · Role-Based Auth ·{' '}
-          <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/RohitRN14/auto-deployment" target="_blank" rel="noopener noreferrer">
             View on GitHub
           </a>
         </p>
@@ -189,6 +231,7 @@ export default function App() {
         isOpen={adminUsersModalOpen}
         onClose={() => setAdminUsersModalOpen(false)}
         onSelectUserFilter={handleSelectUserFilter}
+        onAssignUser={handleAssignToUser}
       />
     </div>
   );

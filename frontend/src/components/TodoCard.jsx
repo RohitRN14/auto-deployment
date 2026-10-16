@@ -12,12 +12,22 @@ function formatDate(dateStr) {
   });
 }
 
-export default function TodoCard({ todo, onToggle, onUpdate, onDelete }) {
-  const [editing, setEditing]     = useState(false);
-  const [editTitle, setEditTitle] = useState(todo.title);
-  const [editDesc, setEditDesc]   = useState(todo.description || '');
-  const [editPrio, setEditPrio]   = useState(todo.priority);
-  const [saving, setSaving]       = useState(false);
+export default function TodoCard({
+  todo,
+  onToggle,
+  onUpdate,
+  onDelete,
+  isAdmin = false,
+  users = [],
+}) {
+  const [editing, setEditing]         = useState(false);
+  const [editTitle, setEditTitle]     = useState(todo.title);
+  const [editDesc, setEditDesc]       = useState(todo.description || '');
+  const [editPrio, setEditPrio]       = useState(todo.priority);
+  const [editAssignee, setEditAssignee] = useState(
+    todo.user?._id || (typeof todo.user === 'string' ? todo.user : '')
+  );
+  const [saving, setSaving]           = useState(false);
 
   const handleToggle = () => onToggle(todo._id);
   const handleDelete = () => onDelete(todo._id);
@@ -26,6 +36,7 @@ export default function TodoCard({ todo, onToggle, onUpdate, onDelete }) {
     setEditTitle(todo.title);
     setEditDesc(todo.description || '');
     setEditPrio(todo.priority);
+    setEditAssignee(todo.user?._id || (typeof todo.user === 'string' ? todo.user : ''));
     setEditing(true);
   };
 
@@ -35,11 +46,18 @@ export default function TodoCard({ todo, onToggle, onUpdate, onDelete }) {
     e.preventDefault();
     if (!editTitle.trim()) return;
     setSaving(true);
-    const success = await onUpdate(todo._id, {
+
+    const updatePayload = {
       title: editTitle.trim(),
       description: editDesc.trim(),
       priority: editPrio,
-    });
+    };
+
+    if (isAdmin) {
+      updatePayload.assignedTo = editAssignee || null;
+    }
+
+    const success = await onUpdate(todo._id, updatePayload);
     setSaving(false);
     if (success) setEditing(false);
   };
@@ -95,8 +113,37 @@ export default function TodoCard({ todo, onToggle, onUpdate, onDelete }) {
                   ))}
                 </select>
               </div>
+
+              {/* Admin Re-assignment Option */}
+              {isAdmin && users.length > 0 && (
+                <div className="edit-assignment-field">
+                  <label htmlFor={`reassign-${todo._id}`} className="edit-assignment-label">
+                    👤 Allot / Reassign To:
+                  </label>
+                  <select
+                    id={`reassign-${todo._id}`}
+                    className="select-field"
+                    value={editAssignee}
+                    onChange={(e) => setEditAssignee(e.target.value)}
+                    style={{ width: '100%' }}
+                  >
+                    <option value="">👤 Unassigned / Guest</option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.role === 'admin' ? '🛡️' : '👤'} {u.name} ({u.role}) — {u.email}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="edit-actions">
-                <button type="button" className="btn btn-ghost" onClick={cancelEdit} style={{ fontSize: '0.82rem', padding: '7px 14px' }}>
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={cancelEdit}
+                  style={{ fontSize: '0.82rem', padding: '7px 14px' }}
+                >
                   Cancel
                 </button>
                 <button
@@ -105,7 +152,7 @@ export default function TodoCard({ todo, onToggle, onUpdate, onDelete }) {
                   disabled={saving || !editTitle.trim()}
                   style={{ fontSize: '0.82rem', padding: '7px 14px' }}
                 >
-                  {saving ? 'Saving…' : 'Save'}
+                  {saving ? 'Saving…' : 'Save Changes'}
                 </button>
               </div>
             </form>
@@ -123,8 +170,13 @@ export default function TodoCard({ todo, onToggle, onUpdate, onDelete }) {
                   <span className="todo-date">📅 {formatDate(todo.dueDate)}</span>
                 )}
                 {todo.userName && (
-                  <span className="todo-author-badge" title={`Owner: ${todo.userEmail || todo.userName}`}>
-                    👤 {todo.userName}
+                  <span
+                    className={`todo-author-badge ${
+                      todo.userEmail?.includes('admin') ? 'author-admin' : 'author-user'
+                    }`}
+                    title={`Allotted to: ${todo.userName} (${todo.userEmail || 'No email'})`}
+                  >
+                    👤 Allotted to: <strong>{todo.userName}</strong>
                   </span>
                 )}
                 <span className="todo-date" style={{ marginLeft: 'auto' }}>
@@ -144,7 +196,7 @@ export default function TodoCard({ todo, onToggle, onUpdate, onDelete }) {
               className="action-btn edit-btn"
               onClick={startEdit}
               aria-label="Edit task"
-              title="Edit"
+              title="Edit & Reassign"
             >
               ✏️
             </button>

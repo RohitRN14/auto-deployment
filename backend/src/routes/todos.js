@@ -23,6 +23,7 @@ const createRules = [
   body('description').optional().trim().isLength({ max: 1000 }),
   body('priority').optional().isIn(['low', 'medium', 'high']),
   body('dueDate').optional({ nullable: true }).isISO8601().toDate(),
+  body('assignedTo').optional({ nullable: true }),
 ];
 
 const updateRules = [
@@ -31,6 +32,7 @@ const updateRules = [
   body('completed').optional().isBoolean(),
   body('priority').optional().isIn(['low', 'medium', 'high']),
   body('dueDate').optional({ nullable: true }).isISO8601().toDate(),
+  body('assignedTo').optional({ nullable: true }),
 ];
 
 const idRule = [param('id').isMongoId().withMessage('Invalid todo ID')];

@@ -1,4 +1,5 @@
 const Todo = require('../models/Todo');
+const User = require('../models/User');
 
 // ── GET /api/todos ─────────────────────────────────────────────────────────────
 const getAllTodos = async (req, res, next) => {
@@ -84,7 +85,7 @@ const getTodoById = async (req, res, next) => {
 // ── POST /api/todos ────────────────────────────────────────────────────────────
 const createTodo = async (req, res, next) => {
   try {
-    const { title, description, priority, dueDate } = req.body;
+    const { title, description, priority, dueDate, assignedTo } = req.body;
 
     const todoData = {
       title,
@@ -94,9 +95,23 @@ const createTodo = async (req, res, next) => {
     };
 
     if (req.user) {
-      todoData.user = req.user._id;
-      todoData.userName = req.user.name;
-      todoData.userEmail = req.user.email;
+      // If admin specifies an assigned user, assign work to that person
+      if (req.user.role === 'admin' && assignedTo) {
+        const targetUser = await User.findById(assignedTo);
+        if (targetUser) {
+          todoData.user = targetUser._id;
+          todoData.userName = targetUser.name;
+          todoData.userEmail = targetUser.email;
+        } else {
+          todoData.user = req.user._id;
+          todoData.userName = req.user.name;
+          todoData.userEmail = req.user.email;
+        }
+      } else {
+        todoData.user = req.user._id;
+        todoData.userName = req.user.name;
+        todoData.userEmail = req.user.email;
+      }
     }
 
     const todo = new Todo(todoData);
@@ -128,12 +143,28 @@ const updateTodo = async (req, res, next) => {
       });
     }
 
-    const { title, description, completed, priority, dueDate } = req.body;
+    const { title, description, completed, priority, dueDate, assignedTo } = req.body;
     if (title !== undefined) todo.title = title;
     if (description !== undefined) todo.description = description;
     if (completed !== undefined) todo.completed = completed;
     if (priority !== undefined) todo.priority = priority;
     if (dueDate !== undefined) todo.dueDate = dueDate;
+
+    // Admin can reassign / allot task to another user
+    if (req.user && req.user.role === 'admin' && assignedTo !== undefined) {
+      if (assignedTo) {
+        const targetUser = await User.findById(assignedTo);
+        if (targetUser) {
+          todo.user = targetUser._id;
+          todo.userName = targetUser.name;
+          todo.userEmail = targetUser.email;
+        }
+      } else {
+        todo.user = null;
+        todo.userName = 'Guest';
+        todo.userEmail = '';
+      }
+    }
 
     const updated = await todo.save();
     res.status(200).json({ success: true, data: updated, message: 'Todo updated successfully' });

@@ -1436,3 +1436,156 @@ body::before {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Admin Task Allotment / Assignment Styles ────────────────────────────────── */
+.add-form-assignment-row {
+  background: rgba(49, 50, 68, 0.45);
+  border: 1px solid rgba(203, 166, 247, 0.25);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 200ms ease;
+}
+
+.assignment-label-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.assignment-icon {
+  font-size: 1.1rem;
+}
+
+.assignee-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--mauve);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.assignment-control-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.assignee-select {
+  flex: 1;
+  background: var(--surface0);
+  border: 1px solid rgba(203, 166, 247, 0.35);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.88rem;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all var(--fast);
+}
+
+.assignee-select:focus {
+  border-color: var(--mauve);
+  box-shadow: 0 0 10px rgba(203, 166, 247, 0.3);
+  outline: none;
+}
+
+.btn-clear-assignee {
+  background: rgba(243, 139, 168, 0.15);
+  border: 1px solid rgba(243, 139, 168, 0.35);
+  color: var(--red);
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--fast);
+}
+
+.btn-clear-assignee:hover {
+  background: var(--red);
+  color: var(--crust);
+}
+
+.assigned-target-pill {
+  font-size: 0.78rem;
+  color: var(--subtext1);
+  background: rgba(203, 166, 247, 0.1);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  align-self: flex-start;
+}
+
+.assigned-target-pill strong {
+  color: var(--mauve);
+}
+
+/* Edit Modal Assignment Field */
+.edit-assignment-field {
+  margin-top: 8px;
+  background: rgba(49, 50, 68, 0.3);
+  border: 1px dashed var(--border-hover);
+  padding: 10px;
+  border-radius: var(--radius-md);
+}
+
+.edit-assignment-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--subtext0);
+  margin-bottom: 6px;
+}
+
+/* Author Badges */
+.todo-author-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.todo-author-badge.author-admin {
+  background: rgba(203, 166, 247, 0.18);
+  color: var(--mauve);
+  border: 1px solid rgba(203, 166, 247, 0.3);
+}
+
+.todo-author-badge.author-user {
+  background: rgba(137, 180, 250, 0.18);
+  color: var(--blue);
+  border: 1px solid rgba(137, 180, 250, 0.3);
+}
+
+/* Admin Users Modal Actions */
+.admin-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-allot {
+  background: linear-gradient(135deg, var(--mauve), var(--pink));
+  color: var(--crust);
+  border: none;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  transition: all var(--fast);
+}
+
+.btn-allot:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(203, 166, 247, 0.4);
+}

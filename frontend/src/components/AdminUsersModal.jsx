@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { authApi } from '../api/todoApi';
 import toast from 'react-hot-toast';
 
-export default function AdminUsersModal({ isOpen, onClose, onSelectUserFilter }) {
+export default function AdminUsersModal({ isOpen, onClose, onSelectUserFilter, onAssignUser }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +38,7 @@ export default function AdminUsersModal({ isOpen, onClose, onSelectUserFilter })
             <div>
               <h3>Admin User Management</h3>
               <p className="auth-subtitle">
-                System directory: registered accounts and task breakdown
+                System directory: registered accounts, task allotments, and breakdown
               </p>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function AdminUsersModal({ isOpen, onClose, onSelectUserFilter })
                   <th>Role</th>
                   <th>Tasks</th>
                   <th>Completed</th>
-                  <th>Action</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -117,16 +117,32 @@ export default function AdminUsersModal({ isOpen, onClose, onSelectUserFilter })
                       <span className="task-done-pill">{u.completedTasks}</span>
                     </td>
                     <td>
-                      <button
-                        type="button"
-                        className="btn-sm btn-outline"
-                        onClick={() => {
-                          onSelectUserFilter(u.id, u.name);
-                          onClose();
-                        }}
-                      >
-                        Filter Tasks
-                      </button>
+                      <div className="admin-table-actions">
+                        <button
+                          type="button"
+                          className="btn-sm btn-outline"
+                          onClick={() => {
+                            onSelectUserFilter(u.id, u.name);
+                            onClose();
+                          }}
+                          title={`Filter tasks by ${u.name}`}
+                        >
+                          Filter
+                        </button>
+                        {onAssignUser && (
+                          <button
+                            type="button"
+                            className="btn-sm btn-allot"
+                            onClick={() => {
+                              onAssignUser(u.id, u.name);
+                              onClose();
+                            }}
+                            title={`Allot / assign new work to ${u.name}`}
+                          >
+                            ➕ Allot Work
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

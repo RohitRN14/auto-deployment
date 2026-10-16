@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const PRIORITIES = [
   { value: 'low',    label: '🟢 Low' },
@@ -6,7 +6,13 @@ const PRIORITIES = [
   { value: 'high',   label: '🔴 High' },
 ];
 
-export default function AddTodoForm({ onAdd }) {
+export default function AddTodoForm({
+  onAdd,
+  isAdmin = false,
+  users = [],
+  assignedUser = '',
+  setAssignedUser,
+}) {
   const [title, setTitle]           = useState('');
   const [description, setDesc]      = useState('');
   const [priority, setPriority]     = useState('medium');
@@ -23,6 +29,7 @@ export default function AddTodoForm({ onAdd }) {
       description: description.trim(),
       priority,
       dueDate: dueDate || null,
+      assignedTo: isAdmin && assignedUser ? assignedUser : undefined,
     };
 
     const success = await onAdd(payload);
@@ -31,19 +38,65 @@ export default function AddTodoForm({ onAdd }) {
       setDesc('');
       setPriority('medium');
       setDueDate('');
+      if (setAssignedUser) setAssignedUser('');
     }
     setSubmitting(false);
   };
 
+  const selectedTarget = users.find((u) => u.id === assignedUser);
+
   return (
     <form className="add-form-card" onSubmit={handleSubmit} aria-label="Add new task">
+      {/* Admin Task Assignment Row */}
+      {isAdmin && (
+        <div className="add-form-assignment-row">
+          <div className="assignment-label-group">
+            <span className="assignment-icon">📋</span>
+            <label htmlFor="todo-assignee-select" className="assignee-label">
+              Allot Task To:
+            </label>
+          </div>
+          <div className="assignment-control-group">
+            <select
+              id="todo-assignee-select"
+              className="select-field assignee-select"
+              value={assignedUser}
+              onChange={(e) => setAssignedUser && setAssignedUser(e.target.value)}
+              aria-label="Assign task to user"
+            >
+              <option value="">👤 Me (TaskFlow Admin)</option>
+              {users.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.role === 'admin' ? '🛡️' : '👤'} {u.name} ({u.role}) — {u.email}
+                </option>
+              ))}
+            </select>
+            {assignedUser && (
+              <button
+                type="button"
+                className="btn-clear-assignee"
+                onClick={() => setAssignedUser && setAssignedUser('')}
+                title="Reset allotment to Admin"
+              >
+                Reset ✕
+              </button>
+            )}
+          </div>
+          {selectedTarget && (
+            <div className="assigned-target-pill">
+              Task will be assigned to: <strong>{selectedTarget.name}</strong> ({selectedTarget.email})
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Title + Priority row */}
       <div className="add-form-row">
         <input
           id="todo-title-input"
           className="input-field"
           type="text"
-          placeholder="✏️  What needs to be done?"
+          placeholder={isAdmin && selectedTarget ? `✏️ What should ${selectedTarget.name} do?` : "✏️  What needs to be done?"}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={200}
@@ -91,7 +144,7 @@ export default function AddTodoForm({ onAdd }) {
           disabled={submitting || !title.trim()}
           style={{ alignSelf: 'flex-end', height: '40px' }}
         >
-          {submitting ? '…' : '+ Add'}
+          {submitting ? '…' : isAdmin && assignedUser ? '+ Allot Task' : '+ Add'}
         </button>
       </div>
     </form>

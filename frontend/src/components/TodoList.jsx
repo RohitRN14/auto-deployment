@@ -17,6 +17,8 @@ export default function TodoList({
   onDelete,
   onClearCompleted,
   stats,
+  isAdmin = false,
+  users = [],
 }) {
   if (loading) {
     return (
@@ -112,6 +114,8 @@ export default function TodoList({
                 onToggle={onToggle}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
+                isAdmin={isAdmin}
+                users={users}
               />
             </li>
           ))}
